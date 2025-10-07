@@ -1,0 +1,23 @@
+option('sasr',
+  type: 'boolean',
+  value: false,
+  description: 'Enable SASR optimization'
+)
+
+option('wav49',
+  type: 'boolean',
+  value: true,
+  description: 'Enable WAV49 format support'
+)
+
+option('ltp_cut',
+  type: 'boolean',
+  value: false,
+  description: 'Enable LTP cut optimization'
+)
+
+option('build_tests',
+  type: 'boolean',
+  value: false,
+  description: 'Build test programs'
+)
