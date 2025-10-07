@@ -8,6 +8,12 @@
 
 #include	"toast.h"
 
+#ifdef _WIN32
+#define fchmod(fd, mode) 0
+#define fchown(fd, uid, gid) 0
+#endif
+
+
 /*  toast -- lossy sound compression using the gsm library.
  */
 
@@ -211,38 +217,40 @@ static char * suffix P2((name, suf), char *name, char * suf)
 }
 
 
-static void catch_signals P1((fun), SIGHANDLER_T (*fun) ())
+static void catch_signals(SIGHANDLER_T (*fun)(int))
 {
-#ifdef	SIGHUP
-	signal( SIGHUP,   fun );
+#ifdef SIGHUP
+    signal(SIGHUP, fun);
 #endif
-#ifdef	SIGINT
-	signal( SIGINT,   fun );
+#ifdef SIGINT
+    signal(SIGINT, fun);
 #endif
-#ifdef	SIGPIPE
-	signal( SIGPIPE,  fun );
+#ifdef SIGPIPE
+    signal(SIGPIPE, fun);
 #endif
-#ifdef	SIGTERM
-	signal( SIGTERM,  fun );
+#ifdef SIGTERM
+    signal(SIGTERM, fun);
 #endif
-#ifdef	SIGXFSZ
-	signal( SIGXFSZ,  fun );
+#ifdef SIGXFSZ
+    signal(SIGXFSZ, fun);
 #endif
 }
 
-static SIGHANDLER_T onintr P0()
-{
-	char * tmp = outname;
 
-#ifdef	HAS_SYSV_SIGNALS
-	catch_signals( SIG_IGN );
+static void onintr(int sig)
+{
+    char *tmp = outname;
+
+#ifdef HAS_SYSV_SIGNALS
+    catch_signals(SIG_IGN);  // ignoring further signals
 #endif
 
-	outname = (char *)0;
-	if (tmp) (void)unlink(tmp);
+    outname = NULL;
+    if (tmp) (void)unlink(tmp);
 
-	exit(1);
+    exit(1);
 }
+
 
 /*
  *  Allocate some memory and complain if it fails.
@@ -253,7 +261,7 @@ static char * emalloc P1((len), size_t len)
 	if (!(s = malloc(len))) {
 		fprintf(stderr, "%s: failed to malloc %d bytes -- abort\n",
 			progname, (int)len);
-		onintr();
+		onintr(0);
 		exit(1);
 	}
 	return s;
